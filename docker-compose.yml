@@ -1,5 +1,3 @@
-version: "3.8"
-
 # Web-Intel Local Stack
 # Ship-independent — runs on every machine
 # Usage: docker compose up -d

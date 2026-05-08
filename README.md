@@ -1,10 +1,10 @@
 # Web Intelligence — OpenClaw Plugin
 
-Smart-routing web search & fetch for OpenClaw. Zero API cost, self-hosted.
+Smart-routing web search, fetch, and screenshots for OpenClaw. Zero API cost, self-hosted.
 
 ## What It Does
 
-Replaces built-in web tooling with an intelligent routing chain.
+Provides plugin-owned replacements for built-in web search/fetch, plus a browser screenshot tool.
 
 ### Search Chain
 ```
@@ -30,6 +30,14 @@ Scrapling (fast) → Scrapling (stealthy) → FlareSolverr (Cloudflare) → Agen
 
 ## Install
 
+Start the local dependency stack first:
+
+```bash
+docker compose up -d
+python3 -m pip install scrapling
+npm i -g agent-browser
+```
+
 ```bash
 openclaw plugins install @ApeironOne/openclaw-web-intel
 ```
@@ -42,6 +50,8 @@ npm install && npm run build
 openclaw plugins install ./
 ```
 
+If the npm package is not published yet, use the source install path.
+
 ## Configuration
 
 In your OpenClaw config:
@@ -49,6 +59,8 @@ In your OpenClaw config:
 ```json5
 {
   plugins: {
+    // plugins.allow is exclusive. Include every plugin this OpenClaw needs.
+    allow: ["web-intel", "browser"],
     entries: {
       "web-intel": {
         config: {
@@ -62,8 +74,8 @@ In your OpenClaw config:
   },
   tools: {
     web: {
-      search: { enabled: false }, // disable core web_search
-      fetch: { enabled: false }   // disable core web_fetch
+      search: { enabled: false }, // plugin provides web_search
+      fetch: { enabled: false }   // plugin provides web_intel_fetch
     }
   },
   browser: {
@@ -83,7 +95,7 @@ export FLARESOLVERR_URL="http://localhost:8191"
 ## Tools Provided
 
 ### `web_search` (provider replacement)
-Replaces the built-in web_search with smart routing.
+Plugin-owned replacement for built-in `web_search`. Disable core web search first.
 
 Parameters:
 - `query` (string, required) — Search query
@@ -96,6 +108,14 @@ Fetches and reads web pages with automatic escalation through anti-bot measures.
 
 Parameters:
 - `url` (string, required) — URL to fetch
+
+### `web_intel_screenshot` (new tool)
+Captures a page screenshot with OpenClaw's browser.
+
+Parameters:
+- `url` (string, required) — URL to capture
+- `width` (number, optional) — screenshot width, default 1280
+- `height` (number, optional) — screenshot height, default 720
 
 ## How It Works
 
@@ -123,6 +143,15 @@ Each ship runs its own SearXNG + FlareSolverr via Docker Compose.
 ### Local Stack (recommended)
 ```bash
 docker compose up -d
+```
+
+Verify the local stack:
+
+```bash
+curl -s "http://localhost:8890/search?q=openclaw&format=json" | jq '.results[:3][] | {title, url}'
+curl -s -X POST "http://localhost:8191/v1" \
+  -H "Content-Type: application/json" \
+  -d '{"cmd":"request.get","url":"https://example.com","maxTimeout":60000}' | jq '.status'
 ```
 
 ## License

@@ -61,8 +61,8 @@ export async function fetchWithBrowser(
 }
 
 /**
- * Search via DuckDuckGo using agent-browser (real browser).
- * Opens DDG, types query, extracts results from the page.
+ * Search using agent-browser (real browser).
+ * Opens a search results page and extracts results from the accessibility tree.
  */
 export async function searchWithBrowser(
   config: WebIntelConfig,
@@ -119,7 +119,7 @@ function parseBrowserSearchResults(
           title: currentTitle,
           url: currentUrl,
           snippet: "",
-          source: "browser-ddg",
+          source: "agent-browser",
         });
         if (results.length >= count) break;
       }
@@ -134,7 +134,7 @@ function parseBrowserSearchResults(
       title: currentTitle,
       url: currentUrl,
       snippet: "",
-      source: "browser-ddg",
+      source: "agent-browser",
     });
   }
 

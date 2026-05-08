@@ -16,7 +16,7 @@ import {
 
 /**
  * Smart search router.
- * Escalation: SearXNG → Browser (DDG Lite)
+ * Escalation: SearXNG → Agent Browser
  *
  * SearXNG is fast and free for tech/code queries.
  * Browser fallback handles news, general, and when SearXNG has no results.
@@ -55,15 +55,15 @@ export async function routeSearch(
     };
   }
 
-  // Step 2: Browser DDG fallback
+  // Step 2: Agent Browser fallback
   if (config.browser?.enabled !== false) {
-    chain.push("browser-ddg");
+    chain.push("agent-browser");
     const browser = await searchWithBrowser(config, params.query, count);
 
     if (browser.ok && browser.data.length > 0) {
       return {
         query: params.query,
-        provider: "browser-ddg",
+        provider: "agent-browser",
         count: browser.data.length,
         tookMs: Date.now() - startedAt,
         results: browser.data,

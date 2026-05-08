@@ -1,6 +1,6 @@
 import { definePluginEntry } from "./types.js";
 import { loadConfig } from "./config.js";
-import { routeFetch } from "./router.js";
+import { routeSearch, routeFetch } from "./router.js";
 import { takeScreenshot } from "./providers/screenshot.js";
 import { Type } from "@sinclair/typebox";
 
@@ -8,7 +8,7 @@ export default definePluginEntry({
   id: "web-intel",
   name: "Web Intelligence",
   description:
-    "Smart-routing web fetch: Scrapling → FlareSolverr → Browser",
+    "Smart-routing web search and fetch: SearXNG → Scrapling → FlareSolverr → Browser",
 
   register(api) {
     const config = loadConfig() as any;
@@ -17,20 +17,86 @@ export default definePluginEntry({
       `web-intel: registering (searxng=${config.searxng?.baseUrl}, flaresolverr=${config.flaresolverr?.baseUrl}, scrapling=${config.scrapling?.enabled}, browser=${config.browser?.enabled})`
     );
 
-    // Register web_intel_fetch for page reading with escalation
-    api.registerTool({
+    const getRuntimeConfig = (ctx?: any) =>
+      loadConfig(
+        ctx?.config?.plugins?.entries?.["web-intel"]?.config as
+          | Record<string, unknown>
+          | undefined
+      );
+
+    // Register web_search as the plugin-owned replacement when core search is disabled.
+    api.registerTool((ctx) => ({
+      name: "web_search",
+      label: "Web Search (Smart Router)",
+      description:
+        "Search the web using smart routing: tries SearXNG first, then Agent Browser fallback. Returns titles, URLs, and snippets. Zero API cost.",
+      parameters: Type.Object(
+        {
+          query: Type.String({ description: "Search query string." }),
+          count: Type.Optional(
+            Type.Number({
+              description: "Number of results (1-10).",
+              minimum: 1,
+              maximum: 10,
+            })
+          ),
+          categories: Type.Optional(
+            Type.String({
+              description:
+                "Search categories: general, news, it, science, files, images, music, videos.",
+            })
+          ),
+          language: Type.Optional(
+            Type.String({
+              description: "Language code for results, for example en, ja, or de.",
+            })
+          ),
+        },
+        { additionalProperties: false }
+      ),
+      async execute(_id: string, params: Record<string, unknown>) {
+        const runtimeConfig = getRuntimeConfig(ctx);
+        const result = await routeSearch(runtimeConfig, {
+          query: params.query as string,
+          count: params.count as number | undefined,
+          categories: params.categories as string | undefined,
+          language: params.language as string | undefined,
+        });
+
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+          details: {
+            query: result.query,
+            provider: result.provider,
+            count: result.count,
+            tookMs: result.tookMs,
+            escalated: result.escalated,
+            escalationChain: result.escalationChain,
+            results: result.results,
+          },
+        };
+      },
+    }));
+
+    // Register web_intel_fetch for page reading with escalation.
+    api.registerTool((ctx) => ({
       name: "web_intel_fetch",
       label: "Web Fetch (Smart Escalation)",
       description:
-        "Fetch and read a web page with smart escalation: Scrapling → FlareSolverr → Browser. Handles Cloudflare, anti-bot, and JS-heavy sites automatically. For SearXNG searches, use the URL format: http://localhost:8890/search?q=YOUR_QUERY&format=json",
+        "Fetch and read a web page with smart escalation: Scrapling → FlareSolverr → Browser. Handles Cloudflare, anti-bot, and JS-heavy sites automatically.",
       parameters: Type.Object(
         {
-          url: Type.String({ description: "URL to fetch and read. For SearXNG searches, use: http://localhost:8890/search?q=YOUR_QUERY&format=json" }),
+          url: Type.String({ description: "URL to fetch and read." }),
         },
         { additionalProperties: false }
       ),
       async execute(_id: string, params: { url: string }) {
-        const runtimeConfig = loadConfig(undefined);
+        const runtimeConfig = getRuntimeConfig(ctx);
         const result = await routeFetch(runtimeConfig, params.url);
 
         return {
@@ -48,7 +114,7 @@ export default definePluginEntry({
           },
         };
       },
-    });
+    }));
 
     // Register screenshot tool (OpenClaw Browser)
     api.registerTool((ctx) => ({
@@ -127,6 +193,6 @@ export default definePluginEntry({
       },
     }));
 
-    api.logger.info("web-intel: registered web_intel_fetch + web_intel_screenshot tools");
+    api.logger.info("web-intel: registered web_search + web_intel_fetch + web_intel_screenshot tools");
   },
 });
