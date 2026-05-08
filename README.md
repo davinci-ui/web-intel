@@ -48,6 +48,8 @@ git clone https://github.com/davinci-ui/web-intel
 cd web-intel
 npm install && npm run build
 openclaw plugins install ./
+npm run browser:bootstrap
+npm run smoke
 ```
 
 If the npm package is not published yet, use the source install path.
@@ -93,6 +95,18 @@ export FLARESOLVERR_URL="http://localhost:8191"
 # Linux VPS/containers usually need this for Agent Browser Chrome startup.
 export AGENT_BROWSER_ARGS="--no-sandbox" # optional fallback; config browser.args is preferred
 ```
+
+
+## Browser Screenshot Reliability
+
+Screenshots depend on OpenClaw Browser, which is separate from the SearXNG/Scrapling/FlareSolverr search and fetch stack. On a VPS or fresh host, bootstrap the browser config before testing screenshots:
+
+```bash
+npm run browser:bootstrap
+npm run smoke
+```
+
+`npm run browser:bootstrap` detects Chrome/Chromium, configures `browser.executablePath`, sets `browser.defaultProfile` to `openclaw`, and enables Linux `browser.noSandbox`. `npm run smoke` verifies search, fetch, direct `browser.request`, and `web_intel_screenshot` end to end. See `docs/browser-screenshot-reliability.md` for the failure matrix and direct gateway commands.
 
 ## Tools Provided
 

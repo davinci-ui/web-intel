@@ -1,4 +1,4 @@
-# Web-Intel v1.1 Handoff
+# Web-Intel v1.1.3 Handoff
 
 This installs Web-Intel as a self-hosted OpenClaw web stack on another machine. Each OpenClaw instance runs its own local SearXNG, FlareSolverr, Scrapling, and Agent Browser dependencies.
 
@@ -10,6 +10,7 @@ cd web-intel
 npm install
 npm run build
 openclaw plugins install ./
+npm run browser:bootstrap
 ```
 
 ## 2. Start Local Services
@@ -41,10 +42,16 @@ On Linux, use `agent-browser install --with-deps` if Chrome dependencies are mis
 export AGENT_BROWSER_ARGS="--no-sandbox"
 ```
 
-OpenClaw screenshots also need Chrome/Chromium. If OpenClaw cannot find a browser, either install system Chromium/Chrome or point OpenClaw at the Playwright browser installed by Agent Browser:
+OpenClaw screenshots also need Chrome/Chromium. Prefer the repo bootstrap script, which detects the right executable and configures OpenClaw:
 
 ```bash
-openclaw config set browser.executablePath /home/davinci/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome
+npm run browser:bootstrap
+```
+
+Manual fallback, if needed:
+
+```bash
+openclaw config set browser.executablePath /path/to/chrome-or-chromium
 openclaw config set browser.noSandbox true --strict-json
 openclaw config set browser.headless true --strict-json
 openclaw config set browser.defaultProfile openclaw
@@ -104,6 +111,15 @@ curl -s -X POST "http://localhost:8191/v1" \
   -d "{\"cmd\":\"request.get\",\"url\":\"https://example.com\",\"maxTimeout\":60000}" | jq ".status"
 ```
 
+
+Run the complete smoke test from the repo:
+
+```bash
+npm run smoke
+```
+
+This verifies gateway health, search, fetch, direct `browser.request`, and `web_intel_screenshot`. If only screenshots fail, use `docs/browser-screenshot-reliability.md`; the issue is the OpenClaw Browser layer, not Web-Intel search/fetch.
+
 Then ask OpenClaw to run:
 
 - `web_search` for a normal search query.
@@ -119,4 +135,4 @@ Expected routing:
 
 https://github.com/davinci-ui/web-intel
 
-Tag for v1.1: `git checkout v1.1`
+Tag for v1.1.3: `git checkout v1.1.3`

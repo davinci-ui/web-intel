@@ -1,7 +1,7 @@
 {
   "id": "web-intel",
   "name": "Web Intelligence",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Smart-routing web search, fetch, and screenshots with SearXNG, Scrapling, FlareSolverr, Agent Browser, and OpenClaw Browser fallback. Zero API cost, self-hosted.",
   "configSchema": {
     "type": "object",
