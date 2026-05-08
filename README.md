@@ -39,12 +39,12 @@ npm i -g agent-browser
 ```
 
 ```bash
-openclaw plugins install @ApeironOne/openclaw-web-intel
+openclaw plugins install @davinci-ui/openclaw-web-intel
 ```
 
 Or from source:
 ```bash
-git clone https://github.com/ApeironOne/web-intel
+git clone https://github.com/davinci-ui/web-intel
 cd web-intel
 npm install && npm run build
 openclaw plugins install ./
@@ -90,6 +90,8 @@ Environment variables (optional):
 ```bash
 export SEARXNG_BASE_URL="http://localhost:8890"
 export FLARESOLVERR_URL="http://localhost:8191"
+# Linux VPS/containers usually need this for Agent Browser Chrome startup.
+export AGENT_BROWSER_ARGS="--no-sandbox"
 ```
 
 ## Tools Provided

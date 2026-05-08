@@ -30,7 +30,7 @@ Built an OpenClaw plugin that provides smart-routing web search and fetch capabi
 - Used OpenClaw SDK: `definePluginEntry`, `registerWebSearchProvider`, `registerTool`
 - Fixed TypeScript compilation errors (AgentToolResult signature, loadConfig types)
 - Built with `npx tsc`, installed to `~/.openclaw/extensions/web-intel/`
-- Published to GitHub: `https://github.com/ApeironOne/web-intel`
+- Published to GitHub: `https://github.com/davinci-ui/web-intel`
 
 ### Phase 2: Provider Routing Nightmare (00:19 - 00:52)
 

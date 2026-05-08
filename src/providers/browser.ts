@@ -27,6 +27,19 @@ async function runAgentBrowser(
   }
 }
 
+function agentBrowserOpenArgs(url: string): string[] {
+  const args = ["open", url];
+  const extraArgs = process.env.AGENT_BROWSER_ARGS?.trim();
+
+  if (extraArgs) {
+    args.push("--args", extraArgs);
+  } else if (process.platform === "linux") {
+    args.push("--args", "--no-sandbox");
+  }
+
+  return args;
+}
+
 /**
  * Fetch a URL using agent-browser (real headless Chrome).
  * Opens the page, waits for load, extracts body text, closes.
@@ -36,7 +49,7 @@ export async function fetchWithBrowser(
   url: string
 ): Promise<ProviderResult<string>> {
   try {
-    await runAgentBrowser("open", url);
+    await runAgentBrowser(...agentBrowserOpenArgs(url));
     // Wait for page to settle
     try {
       await runAgentBrowser("wait", "--load", "networkidle");
@@ -71,7 +84,7 @@ export async function searchWithBrowser(
 ): Promise<ProviderResult<SearchResult[]>> {
   try {
     const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-    await runAgentBrowser("open", ddgUrl);
+    await runAgentBrowser(...agentBrowserOpenArgs(ddgUrl));
     try {
       await runAgentBrowser("wait", "--load", "networkidle");
     } catch {

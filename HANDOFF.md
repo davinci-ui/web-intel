@@ -5,7 +5,7 @@ This installs Web-Intel as a self-hosted OpenClaw web stack on another machine. 
 ## 1. Clone, Build, Install
 
 ```bash
-git clone https://github.com/ApeironOne/web-intel
+git clone https://github.com/davinci-ui/web-intel
 cd web-intel
 npm install
 npm run build
@@ -31,6 +31,12 @@ The bundled `searxng/settings.yml` enables JSON responses and binds to `0.0.0.0`
 python3 -m pip install scrapling
 npm i -g agent-browser
 agent-browser install
+```
+
+On the VPS, set Agent Browser to launch Chrome without the Linux sandbox if Chrome exits early:
+
+```bash
+export AGENT_BROWSER_ARGS="--no-sandbox"
 ```
 
 On Linux, use `agent-browser install --with-deps` if Chrome dependencies are missing.
