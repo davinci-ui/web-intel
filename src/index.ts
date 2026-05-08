@@ -230,6 +230,7 @@ export default definePluginEntry({
         _id: string,
         params: { url: string; width?: number; height?: number }
       ) {
+        const runtimeConfig = getRuntimeConfig(ctx);
         const result = await takeScreenshot(
           {
             sandboxBridgeUrl: ctx.browser?.sandboxBridgeUrl,
@@ -238,7 +239,8 @@ export default definePluginEntry({
           },
           params.url,
           params.width ?? 1280,
-          params.height ?? 720
+          params.height ?? 720,
+          runtimeConfig.browser?.profile ?? "openclaw"
         );
 
         if (!result.ok) {

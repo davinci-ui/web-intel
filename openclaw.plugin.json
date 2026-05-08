@@ -1,7 +1,7 @@
 {
   "id": "web-intel",
   "name": "Web Intelligence",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Smart-routing web search, fetch, and screenshots with SearXNG, Scrapling, FlareSolverr, Agent Browser, and OpenClaw Browser fallback. Zero API cost, self-hosted.",
   "configSchema": {
     "type": "object",
@@ -9,30 +9,65 @@
       "searxng": {
         "type": "object",
         "properties": {
-          "baseUrl": { "type": "string", "description": "SearXNG instance URL" },
-          "categories": { "type": "string", "description": "Default categories (comma-separated)" },
-          "language": { "type": "string", "description": "Default language code" }
+          "baseUrl": {
+            "type": "string",
+            "description": "SearXNG instance URL"
+          },
+          "categories": {
+            "type": "string",
+            "description": "Default categories (comma-separated)"
+          },
+          "language": {
+            "type": "string",
+            "description": "Default language code"
+          }
         }
       },
       "flaresolverr": {
         "type": "object",
         "properties": {
-          "baseUrl": { "type": "string", "description": "FlareSolverr instance URL" },
-          "maxTimeout": { "type": "number", "description": "Max timeout in ms (default 60000)" }
+          "baseUrl": {
+            "type": "string",
+            "description": "FlareSolverr instance URL"
+          },
+          "maxTimeout": {
+            "type": "number",
+            "description": "Max timeout in ms (default 60000)"
+          }
         }
       },
       "scrapling": {
         "type": "object",
         "properties": {
-          "enabled": { "type": "boolean", "description": "Enable scrapling provider" },
-          "pythonPath": { "type": "string", "description": "Path to python3 with scrapling installed" }
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable scrapling provider"
+          },
+          "pythonPath": {
+            "type": "string",
+            "description": "Path to python3 with scrapling installed"
+          }
         }
       },
       "browser": {
         "type": "object",
         "properties": {
-          "enabled": { "type": "boolean", "description": "Enable agent-browser fallback" },
-          "endpoint": { "type": "string", "description": "Browser automation endpoint (if remote)" }
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable agent-browser fallback"
+          },
+          "endpoint": {
+            "type": "string",
+            "description": "Browser automation endpoint (if remote)"
+          },
+          "args": {
+            "type": "string",
+            "description": "Extra agent-browser Chrome args, for example --no-sandbox"
+          },
+          "profile": {
+            "type": "string",
+            "description": "OpenClaw browser profile for screenshots (default: openclaw)"
+          }
         }
       }
     },

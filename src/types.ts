@@ -25,6 +25,8 @@ export interface WebIntelConfig {
   browser?: {
     enabled?: boolean;
     endpoint?: string;
+    args?: string;
+    profile?: string;
   };
 }
 

@@ -27,9 +27,9 @@ async function runAgentBrowser(
   }
 }
 
-function agentBrowserOpenArgs(url: string): string[] {
+function agentBrowserOpenArgs(config: WebIntelConfig, url: string): string[] {
   const args = ["open", url];
-  const extraArgs = process.env.AGENT_BROWSER_ARGS?.trim();
+  const extraArgs = config.browser?.args?.trim();
 
   if (extraArgs) {
     args.push("--args", extraArgs);
@@ -49,7 +49,7 @@ export async function fetchWithBrowser(
   url: string
 ): Promise<ProviderResult<string>> {
   try {
-    await runAgentBrowser(...agentBrowserOpenArgs(url));
+    await runAgentBrowser(...agentBrowserOpenArgs(config, url));
     // Wait for page to settle
     try {
       await runAgentBrowser("wait", "--load", "networkidle");
@@ -84,7 +84,7 @@ export async function searchWithBrowser(
 ): Promise<ProviderResult<SearchResult[]>> {
   try {
     const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-    await runAgentBrowser(...agentBrowserOpenArgs(ddgUrl));
+    await runAgentBrowser(...agentBrowserOpenArgs(config, ddgUrl));
     try {
       await runAgentBrowser("wait", "--load", "networkidle");
     } catch {

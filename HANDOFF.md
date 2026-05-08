@@ -41,6 +41,15 @@ On Linux, use `agent-browser install --with-deps` if Chrome dependencies are mis
 export AGENT_BROWSER_ARGS="--no-sandbox"
 ```
 
+OpenClaw screenshots also need Chrome/Chromium. If OpenClaw cannot find a browser, either install system Chromium/Chrome or point OpenClaw at the Playwright browser installed by Agent Browser:
+
+```bash
+openclaw config set browser.executablePath /home/davinci/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome
+openclaw config set browser.noSandbox true --strict-json
+openclaw config set browser.headless true --strict-json
+openclaw config set browser.defaultProfile openclaw
+```
+
 ## 4. Patch OpenClaw Config
 
 ```json5
@@ -54,7 +63,7 @@ export AGENT_BROWSER_ARGS="--no-sandbox"
           searxng: { baseUrl: "http://localhost:8890" },
           flaresolverr: { baseUrl: "http://localhost:8191" },
           scrapling: { enabled: true, pythonPath: "python3" },
-          browser: { enabled: true }
+          browser: { enabled: true, args: "--no-sandbox", profile: "openclaw" }
         }
       }
     }
@@ -66,7 +75,7 @@ export AGENT_BROWSER_ARGS="--no-sandbox"
     }
   },
   browser: {
-    defaultProfile: "clawd",
+    defaultProfile: "openclaw",
     attachOnly: false,
     headless: false
   }

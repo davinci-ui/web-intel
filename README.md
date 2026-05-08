@@ -67,7 +67,7 @@ In your OpenClaw config:
           searxng: { baseUrl: "http://localhost:8890" },
           flaresolverr: { baseUrl: "http://localhost:8191" },
           scrapling: { enabled: true, pythonPath: "python3" },
-          browser: { enabled: true }
+          browser: { enabled: true, args: "--no-sandbox", profile: "openclaw" }
         }
       }
     }
@@ -79,7 +79,7 @@ In your OpenClaw config:
     }
   },
   browser: {
-    defaultProfile: "clawd",
+    defaultProfile: "openclaw",
     attachOnly: false,
     headless: false
   }
@@ -91,7 +91,7 @@ Environment variables (optional):
 export SEARXNG_BASE_URL="http://localhost:8890"
 export FLARESOLVERR_URL="http://localhost:8191"
 # Linux VPS/containers usually need this for Agent Browser Chrome startup.
-export AGENT_BROWSER_ARGS="--no-sandbox"
+export AGENT_BROWSER_ARGS="--no-sandbox" # optional fallback; config browser.args is preferred
 ```
 
 ## Tools Provided

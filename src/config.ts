@@ -35,6 +35,8 @@ export function loadConfig(pluginConfig?: any): WebIntelConfig {
     browser: {
       enabled: raw.browser?.enabled !== false,
       endpoint: raw.browser?.endpoint || undefined,
+      args: raw.browser?.args || process.env.AGENT_BROWSER_ARGS || undefined,
+      profile: raw.browser?.profile || "openclaw",
     },
   };
 }
