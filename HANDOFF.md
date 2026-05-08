@@ -89,7 +89,7 @@ Restart the OpenClaw gateway after changing config.
 | Tool | Replaces | Description |
 |---|---|---|
 | `web_search` | built-in web_search | Smart routing: SearXNG -> Agent Browser fallback |
-| `web_intel_fetch` | built-in web_fetch | Page fetch: Scrapling -> stealth -> FlareSolverr -> Agent Browser |
+| `web_fetch` / `web_intel_fetch` | built-in web_fetch | Page fetch: Scrapling -> stealth -> FlareSolverr -> Agent Browser |
 | `web_intel_screenshot` | none | Takes a PNG screenshot via OpenClaw Browser |
 | `registerWebSearchProvider` | provider path | Also registered as native web search provider where supported |
 
@@ -107,7 +107,7 @@ curl -s -X POST "http://localhost:8191/v1" \
 Then ask OpenClaw to run:
 
 - `web_search` for a normal search query.
-- `web_intel_fetch` against `https://example.com`.
+- `web_fetch` or `web_intel_fetch` against `https://example.com`.
 - `web_intel_screenshot` against `https://example.com`.
 
 Expected routing:

@@ -108,6 +108,61 @@ export default definePluginEntry({
       }),
     });
 
+    // Register as a native fetch provider for OpenClaw versions that honor providers.
+    api.registerWebFetchProvider({
+      id: "web-intel",
+      label: "Web Intelligence (Smart Fetch)",
+      hint: "Smart-routing fetch: Scrapling -> FlareSolverr -> Agent Browser fallback. Zero API cost.",
+      requiresCredential: false,
+      credentialLabel: "FlareSolverr URL (optional, auto-detected)",
+      envVars: ["FLARESOLVERR_URL", "SEARXNG_BASE_URL"],
+      placeholder: "http://localhost:8191",
+      signupUrl: "https://github.com/davinci-ui/web-intel",
+      autoDetectOrder: 10,
+      credentialPath: "plugins.entries.web-intel.config.flaresolverr.baseUrl",
+
+      getCredentialValue: (fetchConfig?: Record<string, unknown>) => {
+        return (fetchConfig as Record<string, unknown>)?.["web-intel"] ?? undefined;
+      },
+
+      setCredentialValue: (
+        fetchConfigTarget: Record<string, unknown>,
+        value: unknown
+      ) => {
+        fetchConfigTarget["web-intel"] = value;
+      },
+
+      createTool: (ctx) => ({
+        description:
+          "Fetch and read a web page with smart escalation: Scrapling -> FlareSolverr -> Agent Browser.",
+        parameters: Type.Object(
+          {
+            url: Type.String({ description: "URL to fetch and read." }),
+          },
+          { additionalProperties: false }
+        ),
+        execute: async (args: Record<string, unknown>) => {
+          const runtimeConfig = getRuntimeConfig(ctx);
+          const result = await routeFetch(runtimeConfig, args.url as string);
+
+          return {
+            url: result.url,
+            provider: result.provider,
+            content: result.content,
+            tookMs: result.tookMs,
+            escalated: result.escalated,
+            escalationChain: result.escalationChain,
+            externalContent: {
+              untrusted: true,
+              source: "web_fetch",
+              provider: "web-intel",
+              wrapped: true,
+            },
+          };
+        },
+      }),
+    });
+
     // Also register web_search directly for OpenClaw versions where core tools are disabled.
     api.registerTool((ctx) => ({
       name: "web_search",
@@ -165,7 +220,7 @@ export default definePluginEntry({
           },
         };
       },
-    }));
+    }), { name: "web_search" });
 
     // Register web_intel_fetch for page reading with escalation.
     api.registerTool((ctx) => ({
@@ -198,7 +253,7 @@ export default definePluginEntry({
           },
         };
       },
-    }));
+    }), { names: ["web_intel_fetch", "web_fetch"] });
 
     // Register screenshot tool (OpenClaw Browser)
     api.registerTool((ctx) => ({
@@ -277,8 +332,8 @@ export default definePluginEntry({
           },
         };
       },
-    }));
+    }), { name: "web_intel_screenshot" });
 
-    api.logger.info("web-intel: registered provider + web_search + web_intel_fetch + web_intel_screenshot tools");
+    api.logger.info("web-intel: registered web search/fetch providers + web_search + web_fetch + web_intel_fetch + web_intel_screenshot tools");
   },
 });
