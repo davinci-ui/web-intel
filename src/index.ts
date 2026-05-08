@@ -8,7 +8,7 @@ export default definePluginEntry({
   id: "web-intel",
   name: "Web Intelligence",
   description:
-    "Smart-routing web search and fetch: SearXNG → Scrapling → FlareSolverr → Browser",
+    "Smart-routing web search and fetch: SearXNG -> Scrapling -> FlareSolverr -> Browser",
 
   register(api) {
     const config = loadConfig() as any;
@@ -24,7 +24,91 @@ export default definePluginEntry({
           | undefined
       );
 
-    // Register web_search as the plugin-owned replacement when core search is disabled.
+    // Register as a native search provider for OpenClaw versions that honor providers.
+    api.registerWebSearchProvider({
+      id: "web-intel",
+      label: "Web Intelligence (Smart Router)",
+      hint: "Smart-routing search: SearXNG -> Agent Browser fallback. Zero API cost.",
+      requiresCredential: false,
+      credentialLabel: "SearXNG Base URL (optional, auto-detected)",
+      envVars: ["SEARXNG_BASE_URL", "FLARESOLVERR_URL"],
+      placeholder: "http://localhost:8890",
+      signupUrl: "https://github.com/davinci-ui/web-intel",
+      autoDetectOrder: 10,
+      credentialPath: "plugins.entries.web-intel.config.searxng.baseUrl",
+
+      getCredentialValue: (searchConfig?: Record<string, unknown>) => {
+        return (searchConfig as Record<string, unknown>)?.["web-intel"] ?? undefined;
+      },
+
+      setCredentialValue: (
+        searchConfigTarget: Record<string, unknown>,
+        value: unknown
+      ) => {
+        searchConfigTarget["web-intel"] = value;
+      },
+
+      createTool: (ctx) => ({
+        description:
+          "Search the web using smart routing: tries SearXNG first, then Agent Browser fallback. Returns titles, URLs, and snippets. Zero API cost.",
+        parameters: Type.Object(
+          {
+            query: Type.String({ description: "Search query string." }),
+            count: Type.Optional(
+              Type.Number({
+                description: "Number of results (1-10).",
+                minimum: 1,
+                maximum: 10,
+              })
+            ),
+            categories: Type.Optional(
+              Type.String({
+                description:
+                  "Search categories: general, news, it, science, files, images, music, videos.",
+              })
+            ),
+            language: Type.Optional(
+              Type.String({
+                description: "Language code for results, for example en, ja, or de.",
+              })
+            ),
+          },
+          { additionalProperties: false }
+        ),
+        execute: async (args: Record<string, unknown>) => {
+          const runtimeConfig = getRuntimeConfig(ctx);
+          const result = await routeSearch(runtimeConfig, {
+            query: args.query as string,
+            count: args.count as number | undefined,
+            categories: args.categories as string | undefined,
+            language: args.language as string | undefined,
+          });
+
+          return {
+            query: result.query,
+            provider: result.provider,
+            count: result.count,
+            tookMs: result.tookMs,
+            escalated: result.escalated,
+            escalationChain: result.escalationChain,
+            externalContent: {
+              untrusted: true,
+              source: "web_search",
+              provider: "web-intel",
+              wrapped: true,
+            },
+            results: result.results.map((r) => ({
+              title: r.title,
+              url: r.url,
+              snippet: r.snippet,
+              siteName: r.source || undefined,
+            })),
+          };
+        },
+      }),
+    });
+
+    // Also register web_search directly for OpenClaw versions where core tools are disabled.
     api.registerTool((ctx) => ({
       name: "web_search",
       label: "Web Search (Smart Router)",
@@ -88,7 +172,7 @@ export default definePluginEntry({
       name: "web_intel_fetch",
       label: "Web Fetch (Smart Escalation)",
       description:
-        "Fetch and read a web page with smart escalation: Scrapling → FlareSolverr → Browser. Handles Cloudflare, anti-bot, and JS-heavy sites automatically.",
+        "Fetch and read a web page with smart escalation: Scrapling -> FlareSolverr -> Browser. Handles Cloudflare, anti-bot, and JS-heavy sites automatically.",
       parameters: Type.Object(
         {
           url: Type.String({ description: "URL to fetch and read." }),
@@ -121,7 +205,7 @@ export default definePluginEntry({
       name: "web_intel_screenshot",
       label: "Web Screenshot (OpenClaw Browser)",
       description:
-        "Take a screenshot of a web page using OpenClaw's native browser automation. Returns a PNG image buffer.",
+        "Take a screenshot of a web page using OpenClaw native browser automation. Returns a PNG image buffer.",
       parameters: Type.Object(
         {
           url: Type.String({ description: "URL to capture." }),
@@ -193,6 +277,6 @@ export default definePluginEntry({
       },
     }));
 
-    api.logger.info("web-intel: registered web_search + web_intel_fetch + web_intel_screenshot tools");
+    api.logger.info("web-intel: registered provider + web_search + web_intel_fetch + web_intel_screenshot tools");
   },
 });
